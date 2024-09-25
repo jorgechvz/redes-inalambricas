@@ -74,7 +74,7 @@ class SpectrumPlotter:
         self.line, = self.ax.plot([], [], lw=2)  # Crear una línea vacía para actualizar con datos
         
         # Configurar los títulos y etiquetas de los ejes
-        self.ax.set_title("Analizador de Espectro en Tiempo Real")
+        self.ax.set_title(f"Analizador de Espectro en Tiempo Real con frecuencia central de: {self.analyzer.center_freq / 1e6} MHz")
         self.ax.set_xlabel("Span (MHz)")  # Etiqueta del eje x en MHz
         self.ax.set_ylabel("Magnitud (dB)")  # Etiqueta del eje y en dB
         self.ax.grid()  # Activar el grid en la gráfica
@@ -116,9 +116,9 @@ class SpectrumPlotter:
 
 if __name__ == '__main__':
     # Parámetros de configuración del analizador de espectro
-    center_freq = 100e6     # Frecuencia central: 100 MHz
+    center_freq = 90.3e6     # Frecuencia central: 100 MHz
     sample_rate = 10e6      # Tasa de muestreo: 10 MHz
-    bandwidth = 5e6         # Ancho de banda: 5 MHz
+    bandwidth = 10e6         # Ancho de banda: 5 MHz
     gain = 50               # Ganancia: 50 dB
     num_samples = int(1e3)  # Número de muestras a procesar: 1000
 
