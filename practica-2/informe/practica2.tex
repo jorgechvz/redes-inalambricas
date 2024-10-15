@@ -1,0 +1,103 @@
+\documentclass[conference,compsoc]{IEEEtran}
+
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++
+% Paquetes y configuraciones
+\usepackage[spanish]{babel} % Para escribir en español
+\usepackage{graphicx} % Para incluir gráficos
+\usepackage{amsmath}  % Para ecuaciones
+\usepackage{float}    % Para controlar la posición de gráficos
+\usepackage{amssymb}  % Símbolos matemáticos
+\usepackage{geometry} % Para ajustar márgenes
+\usepackage{listings}
+\geometry{left=2cm,right=2cm,top=2.5cm,bottom=2.5cm}
+\usepackage[utf8]{inputenc}  % Codificación UTF-8
+\usepackage[T1]{fontenc}     % Juego de caracteres extendido
+
+%+++++++++++++++++++++++++++++++++++++++++++
+% Corregir malas separaciones de palabras
+\hyphenation{op-tical net-works semi-conduc-tor IEEEtran}
+
+\begin{document}
+
+%+++++++++++++++++++++++++++++++++++++++++++
+% Título y autores
+\title{\LARGE Detección de un Preambulo en una Señal de Radio con SDR}
+
+\author{
+    \IEEEauthorblockN{
+        Jorge Alberto Chavez Ponce, Neyra Torres Luis Kenny, Javier Cana Remache, Rosangela Yllachura Arapa
+    }
+    \IEEEauthorblockA{
+        \textit{Universidad Nacional de San Agustín}\\
+        \textit{Escuela Profesional de Ingeniería de Telecomunicaciones}\\
+        \textit{Arequipa, Perú}
+    }
+}
+
+% Crear el área de título
+\maketitle
+
+%+++++++++++++++++++++++++++++++++++++++++++
+\begin{abstract}
+
+\end{abstract}
+
+
+%+++++++++++++++++++++++++++++++++++++++++++
+% Palabras clave
+\begin{IEEEkeywords}
+
+\end{IEEEkeywords}
+
+%+++++++++++++++++++++++++++++++++++++++++++
+
+%+++++++++++++++++++++++++++++++++++++++++++
+% Cuerpo del documento
+\section{Introducción}
+
+
+\section{Transformada Discreta de Fourier (DFT)}
+
+\subsection{Desarrollo del algoritmo}
+
+a) Desarrolle un algoritmo que permita calcular la transformada discreta de Fourier de cualquier señal \( x \). La DFT mide los componentes de frecuencia de una señal en el dominio del tiempo en frecuencias igualmente espaciadas entre \( 0 \) y \( 2\pi \) radianes por muestra.
+
+\begin{lstlisting}[language=Python, basicstyle=\ttfamily\footnotesize, breaklines=true]
+def dft(signal):
+    N = len(signal)
+    dft_output = np.zeros(N, dtype=complex)
+    for k in range(N):
+        for n in range(N):
+            dft_output[k] += signal[n] * np.exp(-2j * np.pi * k * n / N)
+            
+    return dft_output
+\end{lstlisting}
+En el algoritmo presentado, se desarrolla la implementación de la Transformada Discreta de Fourier (DFT) utilizando un enfoque directo. Este algoritmo calcula los componentes de frecuencia de una señal \(x\) en el dominio del tiempo, analizando frecuencias igualmente espaciadas entre \(0\) y \(2\pi\) radianes por muestra. Se utilizan dos bucles anidados: el externo recorre las frecuencias \(k\) y el interno recorre las muestras \(n\) de la señal, acumulando las contribuciones de cada muestra para la frecuencia correspondiente. Aunque este método es computacionalmente intensivo con una complejidad temporal de \(O(N^2)\), es adecuado para señales de longitud corta y proporciona una implementación didáctica y directa del concepto de la DFT.
+
+\section{Entendiendo la Frecuencia}
+
+Considere la siguiente señal que consiste solo en una frecuencia.
+
+\[
+\exp(1j \times 2 \times \pi \times \left(\frac{2.5}{128}\right) \times t), \quad t \in [0 : 128]
+\]
+
+Si se toma la DFT de esta señal, la frecuencia estará entre dos intervalos.
+
+\begin{itemize}
+    \item \textbf{a) Grafique la DFT de esta señal (La DFT es compleja, solo grafique la magnitud de esta señal):}
+    
+    \begin{itemize}
+        \item \textbf{Código:} Se calculó la DFT de la señal utilizando la fórmula de la DFT discreta y se graficó la magnitud. El código empleado fue el siguiente:
+        
+        \begin{lstlisting}[language=Python, basicstyle=\ttfamily\footnotesize, breaklines=true]
+        dft_signal = dft(signal)
+        plt.stem(np.abs(dft_signal))
+        plt.title("DFT de la se\~nal")
+        plt.xlabel("Frecuencia")
+        plt.ylabel("Magnitud")
+        plt.show()
+        \end{lstlisting}
+    \end{itemize}
+\end{itemize}
+\end{document} 
