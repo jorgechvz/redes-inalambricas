@@ -2,7 +2,9 @@ import numpy as np
 from PIL import Image
 from bladerf import _bladerf
 import time
-from utils import rrc_filter, channel_encode
+import os
+from src.utils import rrc_filter, channel_encode
+
 
 class BladeRFRadio:
     def __init__(self, sample_rate=5e6, center_freq=940e6, gain=60):
@@ -38,16 +40,20 @@ class BladeRFRadio:
 
     def start_transmit(self, signal, duration_sec):
         """Configura y comienza la transmisión de la señal."""
-        buf = self.prepare_signal_for_transmission(signal)  # Prepara la señal para transmisión
+        buf = self.prepare_signal_for_transmission(
+            signal
+        )  # Prepara la señal para transmisión
         num_samples = len(signal)
 
         # Configurar el stream síncrono para la transmisión
-        self.sdr.sync_config(layout=_bladerf.ChannelLayout.TX_X1,
-                             fmt=_bladerf.Format.SC16_Q11,  # Formato de datos int16
-                             num_buffers=16,
-                             buffer_size=8192,
-                             num_transfers=8,
-                             stream_timeout=3500)
+        self.sdr.sync_config(
+            layout=_bladerf.ChannelLayout.TX_X1,
+            fmt=_bladerf.Format.SC16_Q11,  # Formato de datos int16
+            num_buffers=16,
+            buffer_size=8192,
+            num_transfers=8,
+            stream_timeout=3500,
+        )
 
         # Iniciar la transmisión
         print("Iniciando transmisión...")
@@ -63,26 +69,34 @@ class BladeRFRadio:
         self.tx_ch.enable = False  # Deshabilitar el canal de transmisión
         self.sdr.close()
 
+
 if __name__ == "__main__":
     # Parámetros de configuración
-    sample_rate = 5e6  # Tasa de muestreo
+    sample_rate = 1e6  # Tasa de muestreo
     center_freq = 940e6  # Frecuencia central
     gain = 60  # Ganancia
     samples_per_symbol = 8  # Número de muestras por símbolo
     duration_sec = 10  # Duración de la transmisión en segundos
-    beta = 0.2  # Factor de rodadura del filtro RRC
+    beta = 0.35  # Factor de rodadura del filtro RRC
     num_taps = 101  # Número de coeficientes del filtro RRC
 
     # Generar preámbulo
-    preamble_bits = np.array([1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1])
+    preamble_bits = np.array([1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1])
     preamble_symbols = 2 * preamble_bits - 1  # Mapear bits a símbolos BPSK (-1, +1)
 
     # Codificación de canal (repetición)
     repetition = 3
+    # Obtener la ruta absoluta del directorio donde está transmitter.py
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Construir la ruta absoluta a la imagen
+    image_path = os.path.join(current_dir, "../images/imagen3.jpg")
+    bits_path = os.path.join(current_dir, "../data/transmitted_bits.npy")
+    preamble_path = os.path.join(current_dir, "../data/preamble_bits.npy")
 
     # Cargar imagen y convertir a bits
-    image = Image.open('../images/Escudo_UNSA.png')
-    image = image.convert('RGB')  # Mantener la imagen en color RGB
+    image = Image.open(image_path)
+    image = image.convert("RGB")  # Mantener la imagen en color RGB
     width, height = image.size
     image_array = np.array(image)
     image_flat = image_array.flatten()
@@ -93,8 +107,8 @@ if __name__ == "__main__":
     encoded_bits = channel_encode(image_bits, repetition=repetition)
 
     # Crear encabezado con el tamaño de la imagen
-    width_bytes = np.array([width], dtype='>u2').view(np.uint8)
-    height_bytes = np.array([height], dtype='>u2').view(np.uint8)
+    width_bytes = np.array([width], dtype=">u2").view(np.uint8)
+    height_bytes = np.array([height], dtype=">u2").view(np.uint8)
     width_bits = np.unpackbits(width_bytes)
     height_bits = np.unpackbits(height_bytes)
     header_bits = np.concatenate((width_bits, height_bits))
@@ -106,8 +120,8 @@ if __name__ == "__main__":
     bits = np.concatenate((preamble_bits, encoded_header_bits, encoded_bits))
 
     # Guardar bits transmitidos para comparación en el receptor
-    np.save('../data/transmitted_bits.npy', bits)
-    np.save('../data/preamble_bits.npy', preamble_bits)
+    np.save(bits_path, bits)
+    np.save(preamble_path, preamble_bits)
 
     # Mapear bits a símbolos BPSK (-1, +1)
     symbols = 2 * bits - 1
@@ -120,7 +134,7 @@ if __name__ == "__main__":
     rrc_coef = rrc_filter(beta, samples_per_symbol, num_taps)
 
     # Filtrar la señal
-    signal_filtered = np.convolve(symbols_upsampled, rrc_coef, mode='same')
+    signal_filtered = np.convolve(symbols_upsampled, rrc_coef, mode="same")
 
     # Normalizar amplitud de la señal
     signal_filtered /= np.max(np.abs(signal_filtered))

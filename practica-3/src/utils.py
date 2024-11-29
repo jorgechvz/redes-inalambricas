@@ -25,7 +25,7 @@ def rrc_filter(beta, sps, num_taps):
 
     return h
 
-def schmidl_cox_algorithm_vectorized(signal, L, threshold=0.8):
+def schmidl_cox_algorithm_vectorized(signal, L, threshold=0.95):
     """Algoritmo de Schmidl & Cox para detección de preámbulo."""
     # Calcular P(d)
     P = np.zeros(len(signal) - 2 * L + 1, dtype=complex)
@@ -97,3 +97,5 @@ def costas_loop(signal, alpha=0.132, beta=0.00932):
         freq += beta * error
         phase += freq + alpha * error
     return out
+
+
