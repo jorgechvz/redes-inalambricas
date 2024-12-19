@@ -1,6 +1,6 @@
 __pycache__
 .DS_Store
-
+*.env
 *.npy
 # Ignores latex auxiliary files
 ## Core latex/pdflatex auxiliary files:
