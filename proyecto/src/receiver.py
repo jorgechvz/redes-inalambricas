@@ -161,13 +161,13 @@ if __name__ == "__main__":
         # Determinar modulación
         if np.array_equal(modulation_type_bits, [0, 0]):
             modulation_scheme = {"before_processing": received_signal, "after_processing": received_symbols, "modulation_type": "QPSK"}
-            data = symbols_to_bits(image_symbols, modulation_scheme)
+            data = symbols_to_bits(image_symbols, modulation_scheme["modulation_type"])
         elif np.array_equal(modulation_type_bits, [0, 1]):
             modulation_scheme = {"before_processing": received_signal, "after_processing": received_symbols, "modulation_type": "8QAM"}
-            data = symbols_to_bits(image_symbols, modulation_scheme)
+            data = symbols_to_bits(image_symbols, modulation_scheme["modulation_type"])
         elif np.array_equal(modulation_type_bits, [1, 0]):
             modulation_scheme = {"before_processing": received_signal, "after_processing": received_symbols, "modulation_type": "16QAM"}
-            data = symbols_to_bits(image_symbols, modulation_scheme)
+            data = symbols_to_bits(image_symbols, modulation_scheme["modulation_type"])
         else:
             raise ValueError("Modulación desconocida en el encabezado")
 
