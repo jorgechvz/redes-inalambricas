@@ -131,6 +131,33 @@ def symbols_to_bits(symbols, modulation_scheme):
     return bits
 
 
+def plot_constellation(modulation_scheme, ax_no_correction, ax_correction):
+    """
+    Grafica las constelaciones de la señal antes y después del procesamiento.
+
+    Parameters:
+    - modulation_scheme: dict con "before_processing" y "after_processing" (señales).
+    - ax_no_correction: Eje donde se graficará la constelación antes del procesamiento.
+    - ax_correction: Eje donde se graficará la constelación después del procesamiento.
+    """
+
+    # Obtener las señales antes y después del procesamiento
+    before_symbols = modulation_scheme["before_processing"]
+    after_symbols = modulation_scheme["after_processing"]
+    modulation_type = modulation_scheme["modulation_type"]
+
+    # Graficar la constelación antes del procesamiento
+    ax_no_correction.scatter(
+        np.real(before_symbols), np.imag(before_symbols), alpha=0.5
+    )
+    ax_no_correction.set_title(f"{modulation_type} - Sin Corrección")
+
+    # Graficar la constelación después del procesamiento
+    ax_correction.scatter(np.real(after_symbols), np.imag(after_symbols), alpha=0.5)
+    ax_correction.set_title(f"{modulation_type} - Con Corrección")
+
+
+
 # Funciones para modulación QPSK
 
 

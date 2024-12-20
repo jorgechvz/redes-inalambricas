@@ -8,9 +8,9 @@ from modulation_utils import (
     channel_decode,
     symbols_to_bits,
     schmidl_cox_algorithm_vectorized,
+    plot_constellation
 )
 import matplotlib.pyplot as plt
-from graphics import plot_constellation
 
 
 class BladeRFReceiver:
@@ -135,7 +135,7 @@ if __name__ == "__main__":
             print("Se detectó inversión de fase. Corrigiendo inversión de símbolos.")
             # Invertir los símbolos recibidos
             received_bits = 1 - received_bits
-            
+
         # Ahora aplicar la decodificación de canal al resto de los bits
         # Calcular la longitud esperada del encabezado y de los bits de imagen
         header_length = (
@@ -150,7 +150,7 @@ if __name__ == "__main__":
         width_bits = decoded_header_bits[:16]
         height_bits = decoded_header_bits[16:32]
         modulation_type_bits = decoded_header_bits[32:34]
-        image_symbols = received_symbols[len(preamble_bits):]
+        image_symbols = received_symbols[len(preamble_bits) :]
 
         # Convertir bits a enteros de 16 bits
         width_bytes = np.packbits(width_bits)
@@ -160,13 +160,13 @@ if __name__ == "__main__":
 
         # Determinar modulación
         if np.array_equal(modulation_type_bits, [0, 0]):
-            modulation_scheme = "QPSK"
+            modulation_scheme = {"before_processing": received_signal, "after_processing": received_symbols, "modulation_type": "QPSK"}
             data = symbols_to_bits(image_symbols, modulation_scheme)
         elif np.array_equal(modulation_type_bits, [0, 1]):
-            modulation_scheme = "8QAM"
+            modulation_scheme = {"before_processing": received_signal, "after_processing": received_symbols, "modulation_type": "8QAM"}
             data = symbols_to_bits(image_symbols, modulation_scheme)
         elif np.array_equal(modulation_type_bits, [1, 0]):
-            modulation_scheme = "16QAM"
+            modulation_scheme = {"before_processing": received_signal, "after_processing": received_symbols, "modulation_type": "16QAM"}
             data = symbols_to_bits(image_symbols, modulation_scheme)
         else:
             raise ValueError("Modulación desconocida en el encabezado")
