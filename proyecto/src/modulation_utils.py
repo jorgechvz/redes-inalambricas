@@ -35,6 +35,29 @@ def schmidl_cox_algorithm_vectorized(signal, L, threshold=0.95):
     else:
         return None, M
 
+def costas_loop(signal, modulation_order=2, alpha=0.132, beta=0.00932):
+    """
+    Recuperación de sincronización de fase utilizando el algoritmo de Costas Loop.
+    """
+    N = len(signal)
+    phase = 0
+    freq = 0
+    out = np.zeros(N, dtype=np.complex128)
+    for i in range(N):
+        out[i] = signal[i] * np.exp(-1j * phase)
+        if modulation_order == 2:  # BPSK
+            error = np.sign(np.real(out[i])) * np.imag(out[i])
+        elif modulation_order == 4:  # QPSK
+            error = np.sign(np.real(out[i])) * np.imag(out[i]) - np.sign(
+                np.imag(out[i])
+            ) * np.real(out[i])
+        else:
+            # Para modulación de orden superior, se requiere un bucle de fase más complejo
+            error = np.angle(out[i] ** modulation_order)
+        freq += beta * error
+        phase += freq + alpha * error
+    return out
+
 
 def mueller_muller_timing_recovery(signal, sps):
     """
@@ -85,11 +108,12 @@ def rrc_filter(beta, sps, num_taps):
     h /= np.sqrt(np.sum(h**2))
     return h
 
-
+# TRANSMISOR
 def bits_to_symbols(bits, modulation_scheme):
-    if modulation_scheme == "BPSK":
+    if modulation_scheme == "BPSK": # Para el preambulo, encabezado y tipo de modulacion
         # BPSK: 1 bit por símbolo
         symbols = 2 * bits - 1
+    # Otras modulaciones para los bits de la imagen
     elif modulation_scheme == "QPSK":
         # QPSK: 2 bits por símbolo
         bits_reshaped = bits.reshape(-1, 2)
@@ -110,13 +134,14 @@ def bits_to_symbols(bits, modulation_scheme):
         raise ValueError("Modulación no soportada.")
     return symbols
 
-
+# RECEPTOR
 def symbols_to_bits(symbols, modulation_scheme):
-    if modulation_scheme == "BPSK":
-        # BPSK: 1 bit por símbolo
+    if modulation_scheme == "BPSK": # Para el preambulo, encabezado y tipo de modulacion
+        # BPSK: 1 bit por símbolo 
         bits = (np.real(symbols) > 0).astype(
             np.uint8
         )  # Decisión basada en la parte real
+    # Otras modulaciones para los bits de la imagen
     elif modulation_scheme == "QPSK":
         # Demodulación QPSK
         bits = qpsk_demodulate(symbols)
@@ -157,33 +182,7 @@ def plot_constellation(modulation_scheme, ax_no_correction, ax_correction):
     ax_correction.set_title(f"{modulation_type} - Con Corrección")
 
 
-
 # Funciones para modulación QPSK
-
-
-def costas_loop(signal, modulation_order=2, alpha=0.132, beta=0.00932):
-    """
-    Recuperación de sincronización de fase utilizando el algoritmo de Costas Loop.
-    """
-    N = len(signal)
-    phase = 0
-    freq = 0
-    out = np.zeros(N, dtype=np.complex128)
-    for i in range(N):
-        out[i] = signal[i] * np.exp(-1j * phase)
-        if modulation_order == 2:  # BPSK
-            error = np.sign(np.real(out[i])) * np.imag(out[i])
-        elif modulation_order == 4:  # QPSK
-            error = np.sign(np.real(out[i])) * np.imag(out[i]) - np.sign(
-                np.imag(out[i])
-            ) * np.real(out[i])
-        else:
-            # Para modulación de orden superior, se requiere un bucle de fase más complejo
-            error = np.angle(out[i] ** modulation_order)
-        freq += beta * error
-        phase += freq + alpha * error
-    return out
-
 
 def qpsk_demodulate(symbols):
     bits = np.zeros((len(symbols), 2), dtype=np.uint8)
